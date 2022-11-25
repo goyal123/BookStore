@@ -4,11 +4,9 @@ using System.Text;
 
 namespace CommonLayer.Model
 {
-    public class Login
+    public class ResetPassword
     {
-        public string Email { get; set; }
         public string Password { get; set; }
-
+        public string confirmPassword { get; set; }
     }
-
 }

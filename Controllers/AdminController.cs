@@ -1,5 +1,5 @@
 ﻿using BookStore.BusinessLayer.Interface;
-using BookStore.CommonLayer.Model;
+using BusinessLayer.Service;
 using CommonLayer.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,37 +11,13 @@ namespace BookStore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class AdminController : ControllerBase
     {
-        private readonly IUserBL userBL;
+        private readonly IAdminBL adminBL;
 
-        public UserController(IUserBL userBL)
+        public AdminController(IAdminBL adminBL)
         {
-            this.userBL = userBL;
-        }
-        
-        [HttpPost("Register")]
-
-        public IActionResult Registration(Register registration)
-        {
-            try
-            {
-                var result = userBL.UserRegistration(registration);
-                if (result != null)
-                {
-                    return this.Ok(new { success = true, message = "User Registration Successfull", data = result });
-                }
-                else
-                {
-                    return this.BadRequest(new { success = false, message = "User Registration UnSuccessfull" });
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            this.adminBL = adminBL;
         }
 
         [HttpPost("Login")]
@@ -49,22 +25,20 @@ namespace BookStore.Controllers
         {
             try
             {
-                var userdata = userBL.LoginUser(login);
+                var userdata = adminBL.LoginAdmin(login);
                 if (userdata != null)
                 {
-                    return this.Ok(new { success = true, message = "User Login Successfull", data = userdata });
+                    return this.Ok(new { success = true, message = "Admin Login Successfull", data = userdata });
                 }
                 else
                 {
                     return this.BadRequest(new { success = false, message = "Invalid Credentials" });
                 }
-
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-
         }
 
         [HttpPost("ForgotPassword")]
@@ -72,7 +46,7 @@ namespace BookStore.Controllers
         {
             try
             {
-                var result = userBL.ForgetPassword(emailid);
+                var result = adminBL.ForgetPassword(emailid);
                 if (result != null)
                 {
                     return this.Ok(new { success = true, message = "Password reset link send Successfull", data = result });
@@ -81,17 +55,14 @@ namespace BookStore.Controllers
                 {
                     return this.BadRequest(new { success = false, message = "User not registered" });
                 }
-
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-
-
         }
 
-        [Authorize(Roles =Role.User)]
+        [Authorize(Roles = Role.Admin)]
         [HttpPost("ResetPassword")]
 
         public IActionResult ResetPassword(ResetPassword resetpass)
@@ -99,11 +70,10 @@ namespace BookStore.Controllers
             try
             {
                 var email = User.FindFirst(ClaimTypes.Email).Value.ToString();
-                var userdata = userBL.ResetPassUser(email, resetpass);
-
-                if (userdata != null)
+                var admindata = adminBL.ResetPassAdmin(email, resetpass);
+                if (admindata != null)
                 {
-                    return this.Ok(new { success = true, message = "Reset password Successfull", data = userdata });
+                    return this.Ok(new { success = true, message = "Reset password Successfull"});
                 }
                 else
                 {
@@ -115,8 +85,5 @@ namespace BookStore.Controllers
                 throw new Exception(ex.Message);
             }
         }
-
-
-
     }
 }
