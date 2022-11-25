@@ -19,6 +19,7 @@ using RepositoryLayer.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using BusinessLayer.Interface;
 
 namespace BookStore
 {
@@ -39,6 +40,8 @@ namespace BookStore
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IAdminRL, AdminRL>();
             services.AddTransient<IAdminBL, AdminBL>();
+            services.AddTransient<IBookBL, BookBL>();
+            services.AddTransient<IBookRL, BookRL>();
 
             //services.AddSwaggerGen(c =>
             //{
