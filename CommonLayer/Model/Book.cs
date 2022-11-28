@@ -14,6 +14,7 @@ namespace CommonLayer.Model
         public long DiscountedPrice { get; set; }
         public int Rating{ get; set; }
         public long CustomerRatedcount { get; set; }
+        public long BookStockQty { get; set; }
 
     }
 }

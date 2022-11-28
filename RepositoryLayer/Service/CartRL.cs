@@ -9,7 +9,7 @@ using System.Text;
 
 namespace RepositoryLayer.Service
 {
-    public class CartRL:ICartRL
+    public class CartRL : ICartRL
     {
         private readonly string Connectionstring;
         public CartRL(IConfiguration configuration)
@@ -17,6 +17,11 @@ namespace RepositoryLayer.Service
             Connectionstring = configuration.GetConnectionString("BookStoreDB");
 
         }
+
+        public CartRL()
+        {
+        }
+
         public Cartmodel AddCart(string email, Cartmodel cartmodel)
         {
             string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
@@ -110,6 +115,57 @@ namespace RepositoryLayer.Service
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        
+        public List<Cartmodel> GetCart(string email)
+        {
+            string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
+
+            SqlConnection connection = new SqlConnection(Connectionstring);
+
+            List<Cartmodel> cart = new List<Cartmodel>();
+            try
+            {
+                SqlCommand cmd = new SqlCommand("sp_UserIdcheck", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Email", email);
+                connection.Open();
+                var userid = cmd.ExecuteScalar();
+
+                if (userid != null)
+                {
+                    SqlCommand cmd1 = new SqlCommand("sp_GetCart", connection);
+
+                    cmd1.CommandType = CommandType.StoredProcedure;
+                    cmd1.Parameters.AddWithValue("@UserId", userid);
+                    using (SqlDataReader reader = cmd1.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            cart.Add(new Cartmodel()
+                            {   
+                                Quantity=Convert.ToInt32(reader.GetValue(1)),
+                                BookId=Convert.ToInt32(reader.GetValue(2))
+                            });
+                        }
+                    }
+
+                    return cart;
+
+                }
+                else
+                {
+                    return null;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+
         }
     }
 }

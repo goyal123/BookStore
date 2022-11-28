@@ -90,6 +90,31 @@ namespace BookStore.Controllers
             
         }
 
+        [Authorize]
+        [HttpGet("GetBookByid")]
+
+        public IActionResult GetBookById(long BookId)
+        {
+            try
+            {
+                var result = bookBL.GetBookById(BookId);
+                if (result != null)
+                {
+                    return this.Ok(new { success = true, message = "Book Fetch Successfull", data = result });
+                }
+                else
+                {
+                    return this.BadRequest(new { success = false, message = "Book Fetch UnSuccessfull" });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
         [Authorize(Roles = Role.Admin)]
         [HttpDelete("DeleteBook")]
 

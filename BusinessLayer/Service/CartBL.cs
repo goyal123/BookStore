@@ -51,5 +51,19 @@ namespace BusinessLayer.Service
                 throw new Exception(ex.Message);
             }
         }
+
+        
+        public List<Cartmodel> GetCart(string email)
+        {
+            try
+            {
+                return cartRL.GetCart(email);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        
     }
 }

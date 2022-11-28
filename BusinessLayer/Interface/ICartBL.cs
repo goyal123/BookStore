@@ -10,5 +10,6 @@ namespace BusinessLayer.Interface
         public Cartmodel AddCart(string email, Cartmodel cartmodel);
         public Cartmodel UpdateCart(long CartId, Cartmodel cartmodel);
         public bool DeleteCart(long CartId);
+        public List<Cartmodel> GetCart(string email);
     }
 }

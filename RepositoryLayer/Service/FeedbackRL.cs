@@ -52,5 +52,41 @@ namespace RepositoryLayer.Service
                 throw new Exception(ex.Message);
             }
         }
+
+        public List<Feedmodel> GetAllFeedback(long BookId)
+        {
+            string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
+            SqlConnection connection = new SqlConnection(Connectionstring);
+            
+
+            try
+            {
+                List<Feedmodel> feedlist = new List<Feedmodel>();
+                SqlCommand cmd = new SqlCommand("sp_GetAllFeedBack", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@BookId",BookId);
+                connection.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        feedlist.Add(new Feedmodel()
+                        {
+                            Comment=reader.GetValue(2).ToString(),
+                            Rating=Convert.ToInt32(reader.GetValue(3)),
+                            BookId=Convert.ToInt64(reader.GetValue(4))
+                        });
+                    }
+                }
+
+                return feedlist;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using CommonLayer.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace BookStore.Controllers
 {
@@ -18,6 +20,7 @@ namespace BookStore.Controllers
             this.cartBL = cartBL;
         }
 
+        [Authorize]
         [HttpPost("AddCart")]
         public IActionResult AddCart(Cartmodel cartmodel)
         {
@@ -40,6 +43,7 @@ namespace BookStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("UpdateCart")]
         public IActionResult AddCart(long CartId,Cartmodel cartmodel)
         {
@@ -61,6 +65,7 @@ namespace BookStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("DeleteCart")]
         public IActionResult DeleteCart(long CartId)
         {
@@ -82,6 +87,33 @@ namespace BookStore.Controllers
             }
 
         }
+
+        
+        [Authorize]
+        [HttpGet("GetCart")]
+
+        public async Task<IActionResult> GetCart()
+        {
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email).Value.ToString();
+                var result = cartBL.GetCart(email);
+                if (result != null)
+                {
+                    return this.Ok(new { success = true, message = "Cart Fetch Successfull", data = result });
+                }
+                else
+                {
+                    return this.BadRequest(new { success = false, message = "Cart Fetch UnSuccessfull" });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+        
 
     }
 

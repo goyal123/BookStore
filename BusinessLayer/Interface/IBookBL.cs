@@ -12,5 +12,6 @@ namespace BusinessLayer.Interface
 
         public List<Book> GetAllBooks();
         public bool DeleteBook(int BookId);
+        public Book GetBookById(long BookId);
     }
 }

@@ -1,44 +1,42 @@
 ﻿using BookStore.BusinessLayer.Interface;
-using CommonLayer.Model;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Service;
 using System;
-using System.Collections.Generic;
 
 namespace BookStore.BusinessLayer.Service
 {
-    public class FeedbackBL:IFeedbackBL
+    public class WishlistBL:IWishlistBL
     {
-        private readonly IFeedbackRL feedbackRL;
-        public FeedbackBL(IFeedbackRL feedbackRL)
+        private readonly IWishlistRL wishlistRL;
+        public WishlistBL(IWishlistRL wishlistRL)
         {
-            this.feedbackRL = feedbackRL;
+            this.wishlistRL = wishlistRL;
         }
 
-        public Feedmodel AddFeedback(string email,Feedmodel feed)
+        public bool AddItem(string email, long BookId)
         {
             try
             {
-                return feedbackRL.AddFeedback(email, feed);
+                return wishlistRL.AddItem(email, BookId);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+
         }
 
-        public List<Feedmodel> GetAllFeedback(long BookId)
+        public bool DeleteItem(string email, long WishlistId)
         {
             try
             {
-                return feedbackRL.GetAllFeedback(BookId);
+                return wishlistRL.DeleteItem(email, WishlistId);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+
         }
-
-
     }
 }

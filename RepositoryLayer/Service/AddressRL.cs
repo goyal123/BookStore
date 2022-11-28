@@ -6,25 +6,26 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Security.Cryptography.X509Certificates;
+using System.Net;
 using System.Text;
 
 namespace RepositoryLayer.Service
 {
-    public class OrderRL:IorderRL
+    public class AddressRL:IAddressRL
     {
         private readonly string Connectionstring;
-        public OrderRL(IConfiguration configuration)
+
+        public AddressRL(IConfiguration configuration)
         {
             Connectionstring = configuration.GetConnectionString("BookStoreDB");
-
         }
 
-        public bool AddOrder(string email, long CartId)
+        public AddressModel CreateAddress(string email,long Address_Type, AddressModel addressModel)
         {
             string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
+
             SqlConnection connection = new SqlConnection(Connectionstring);
-            DateTime orderDate = DateTime.Now;
+
             try
             {
                 SqlCommand cmd = new SqlCommand("sp_UserIdcheck", connection);
@@ -33,74 +34,26 @@ namespace RepositoryLayer.Service
                 connection.Open();
                 var userid = cmd.ExecuteScalar();
 
-                SqlCommand cmd1 = new SqlCommand("sp_GetQuantityFromCart", connection);
+                SqlCommand cmd1 = new SqlCommand("sp_AddAddress", connection);
                 cmd1.CommandType = CommandType.StoredProcedure;
-                cmd1.Parameters.AddWithValue("@CartId", CartId);
+                cmd1.Parameters.AddWithValue("@Address", addressModel.Address);
+                cmd1.Parameters.AddWithValue("@City", addressModel.City);
+                cmd1.Parameters.AddWithValue("@State", addressModel.State);
+                cmd1.Parameters.AddWithValue("@Address_Type",Address_Type);
                 cmd1.Parameters.AddWithValue("@UserId", userid);
-                var Quantity = cmd1.ExecuteScalar();
 
-                SqlCommand cmd2 = new SqlCommand("sp_GetBookIdFromCart", connection);
-                cmd2.CommandType = CommandType.StoredProcedure;
-                cmd2.Parameters.AddWithValue("@CartId", CartId);
-                cmd2.Parameters.AddWithValue("@UserId", userid);
-                var BookId = cmd2.ExecuteScalar();
-
-
-                SqlCommand cmd3 = new SqlCommand("sp_AddOrder", connection);
-                cmd3.CommandType = CommandType.StoredProcedure;
-                cmd3.Parameters.AddWithValue("@OrderDate", orderDate);
-                cmd3.Parameters.AddWithValue("@CartId", CartId);
-                cmd3.Parameters.AddWithValue("@BookId", BookId);
-                cmd3.Parameters.AddWithValue("@UserId", userid);
-                cmd3.Parameters.AddWithValue("Book_Quantity",Quantity);
-
-                var result = cmd3.ExecuteNonQuery();
-                //connection.Close();
-                if (result != 0)
-                {
-                    SqlCommand cmd4 = new SqlCommand("sp_UpdateBookQuantity", connection);
-                    cmd4.CommandType = CommandType.StoredProcedure;
-                    cmd4.Parameters.AddWithValue("@BookId",BookId);
-                    cmd4.Parameters.AddWithValue("@BookStockQuantity", Quantity);
-                    var result1 = cmd4.ExecuteNonQuery();
-
-                    CartRL cartRL = new CartRL();
-                    cartRL.DeleteCart(CartId);
-                    
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public bool DeleteOrder(long OrderId)
-        {
-            string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
-            SqlConnection connection = new SqlConnection(Connectionstring);
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("sp_DeleteOrder", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@OrderId", OrderId);
-                connection.Open();
-                var result = cmd.ExecuteNonQuery();
+                var result = cmd1.ExecuteNonQuery();
                 connection.Close();
+
                 if (result != 0)
                 {
-                    return true;
+                    return addressModel;
                 }
                 else
                 {
-                    return false;
+                    return null;
                 }
+
             }
             catch (Exception ex)
             {
@@ -108,11 +61,12 @@ namespace RepositoryLayer.Service
             }
         }
 
-        public List<OrderModel> GetAllOrders(string email)
+        public AddressModel UpdateAddress(string email, long Address_Type, AddressModel addressModel)
         {
             string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
+
             SqlConnection connection = new SqlConnection(Connectionstring);
-            List<OrderModel> orderlist = new List<OrderModel>();
+
             try
             {
                 SqlCommand cmd = new SqlCommand("sp_UserIdcheck", connection);
@@ -121,29 +75,72 @@ namespace RepositoryLayer.Service
                 connection.Open();
                 var userid = cmd.ExecuteScalar();
 
-                SqlCommand cmd1 = new SqlCommand("sp_GetAllOrders", connection);
+                SqlCommand cmd1 = new SqlCommand("sp_UpdateAddress", connection);
                 cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.AddWithValue("@Address", addressModel.Address);
+                cmd1.Parameters.AddWithValue("@City", addressModel.City);
+                cmd1.Parameters.AddWithValue("@State", addressModel.State);
+                cmd1.Parameters.AddWithValue("@Address_Type",Address_Type);
                 cmd1.Parameters.AddWithValue("@UserId", userid);
-                using (SqlDataReader reader = cmd1.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        orderlist.Add(new OrderModel()
-                        {
-                            OrderId=Convert.ToInt32(reader.GetValue(0)),
-                            OrderDate = reader.GetValue(1).ToString(),
-                            CartId = Convert.ToInt32(reader.GetValue(2))
-                        });
-                    }
-                }
 
-                return orderlist;
+                var result = cmd1.ExecuteNonQuery();
+                connection.Close();
+
+                if (result != 0)
+                {
+                    return addressModel;
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+        }
 
+        public AddressModel GetAddress(string email, int Address_Type)
+        {
+            string Connectionstring = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=BookStore;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;";
+
+            SqlConnection connection = new SqlConnection(Connectionstring);
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("sp_UserIdcheck", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Email", email);
+                connection.Open();
+                var userid = cmd.ExecuteScalar();
+
+                AddressModel addressModelobj = new AddressModel();
+                SqlCommand cmd1 = new SqlCommand("sp_GetAddress", connection);
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.AddWithValue("@Address_Type",Address_Type);
+                cmd1.Parameters.AddWithValue("@UserId", userid);
+                SqlDataReader reader = cmd1.ExecuteReader();
+                while (reader.Read())
+                {
+                    addressModelobj.Address = reader.GetValue(1).ToString();
+                    addressModelobj.City = reader.GetValue(2).ToString();
+                    addressModelobj.State = reader.GetValue(3).ToString();
+                }
+                if (addressModelobj != null)
+                {
+                    return addressModelobj;
+                }
+                else
+                {
+                    return null;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

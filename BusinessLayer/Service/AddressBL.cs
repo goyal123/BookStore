@@ -1,26 +1,23 @@
 ﻿using BookStore.BusinessLayer.Interface;
 using BookStore.CommonLayer.Model;
-using CommonLayer.Model;
 using RepositoryLayer.Interface;
-using RepositoryLayer.Service;
 using System;
-using System.Collections.Generic;
 
 namespace BookStore.BusinessLayer.Service
 {
-    public class OrderBL:IOrderBL
+    public class AddressBL:IAddressBL
     {
-        private readonly IorderRL orderRL;
-        public OrderBL(IorderRL orderRL)
+        private readonly IAddressRL addressRL;
+        public AddressBL(IAddressRL addressRL)
         {
-            this.orderRL = orderRL;
+            this.addressRL = addressRL;
         }
 
-        public bool AddOrder(string email, long CartId)
+        public AddressModel CreateAddress(string email, long Address_Type, AddressModel addressModel)
         {
             try
             {
-                return orderRL.AddOrder(email,CartId);
+                return addressRL.CreateAddress(email, Address_Type,addressModel);
             }
             catch (Exception ex)
             {
@@ -28,11 +25,11 @@ namespace BookStore.BusinessLayer.Service
             }
         }
 
-        public bool DeleteOrder(long OrderId)
+        public AddressModel UpdateAddress(string email, long Address_Type, AddressModel addressModel)
         {
             try
             {
-                return orderRL.DeleteOrder(OrderId);
+                return addressRL.UpdateAddress(email, Address_Type,addressModel);
             }
             catch (Exception ex)
             {
@@ -40,17 +37,17 @@ namespace BookStore.BusinessLayer.Service
             }
         }
 
-        public List<OrderModel> GetAllOrders(string email)
+        public AddressModel GetAddress(string email,int Address_Type)
         {
             try
             {
-                return orderRL.GetAllOrders(email);
+                return addressRL.GetAddress(email, Address_Type);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-        }
 
+        }
     }
 }
